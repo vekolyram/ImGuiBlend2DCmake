@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(ImGuiCmake)
+project(ImGuiBlend2D)
 
 # 设置C++标准
 set(CMAKE_CXX_STANDARD 17)
@@ -7,8 +7,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # 设置输出目录
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # 包含目录设置
 include_directories(
@@ -16,7 +14,6 @@ include_directories(
         libs/blend2d/include
         libs/glfw/include
         libs/imgui/include/imgui
-        libs/imgui/include/imgui/backends
 )
 # 收集应用程序源文件
 file(GLOB APP_SOURCES
@@ -26,6 +23,8 @@ file(GLOB APP_SOURCES
 # 添加应用程序可执行文件
 add_executable(${PROJECT_NAME}
         ${APP_SOURCES}
+        src/ImGuiMgr.cpp
+        include/ImGuiMgr.h
 )
 
 # 链接ImGui库到应用程序
