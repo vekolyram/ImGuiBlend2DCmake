@@ -5,6 +5,7 @@
 #include "ImGuiMgr.h"
 #include <cstdio>
 #include <string>
+#include "imnodes.h"
 namespace Backend {
     static void glfw_error_callback(int error, const char *description) {
         throw "GLFW Error!" + std::to_string(error) + description;
@@ -15,13 +16,15 @@ namespace Backend {
             return;
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-        window = glfwCreateWindow(currentConfig->width, currentConfig->height, currentConfig->title, nullptr, nullptr);
+        window = glfwCreateWindow(currentConfig->set_width, currentConfig->set_height, currentConfig->title, nullptr,
+                                  nullptr);
         if (window == nullptr)
             return;
         glfwMakeContextCurrent(window);
         glfwSwapInterval(currentConfig->vsync); // Enable vsync
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
+        ImNodes::CreateContext();
         ImGuiIO &io = ImGui::GetIO();
         (void) io;
         io.ConfigFlags |= currentConfig->flags;
@@ -42,21 +45,23 @@ namespace Backend {
     }
     void ImGuiMgr::render() const {
         ImGui::Render();
-        glViewport(0, 0, currentConfig->ms_width, currentConfig->ms_height);
-        glClearColor(0.45f, 0.55f, 0.60f, 1.00f);
+        glViewport(0, 0, currentConfig->fb_width, currentConfig->fb_height);
+        glClearColor(1.0f, 1.0f, 1.0f, 1.00f);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         if (currentConfig->isViewportEnable) {
-            GLFWwindow *backup_current_context = glfwGetCurrentContext();
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
-            glfwMakeContextCurrent(backup_current_context);
         }
+        glfwMakeContextCurrent(window);
         glfwSwapBuffers(window);
+        measureWH();
+        measureFBWH();
     }
     ImGuiMgr::~ImGuiMgr() {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
+        ImNodes::DestroyContext();
         ImGui::DestroyContext();
         glfwDestroyWindow(window);
         glfwTerminate();

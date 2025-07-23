@@ -16,8 +16,9 @@ namespace Backend {
             const char *title;
             const ImGuiConfigFlags flags;
             const int vsync;
-            const int width, height;
-            int ms_width, ms_height, fb_width, fb_height;
+            const int set_width, set_height;
+            int get_width, get_height, fb_width, fb_height;
+            int last_width = 0, last_height = 0;
             const char *glsl_version;
             bool dark;
             bool isDockingEnable;
@@ -25,9 +26,9 @@ namespace Backend {
             explicit ImguiConfig(const char *title = "DefaultTitle", const int width = 1280, const int height = 720,
                                  const ImGuiConfigFlags flags = 0, const int vsync = 1,
                                  const char *glsl_version = "#version 130", const bool dark = true) :
-                title(title), flags(flags), vsync(vsync), width(width), height(height), glsl_version(glsl_version),
-                dark(dark), isDockingEnable(flags & ImGuiConfigFlags_DockingEnable),
-                isViewportEnable(flags & ImGuiConfigFlags_ViewportsEnable), ms_width(0), ms_height(0), fb_width(0),
+                title(title), flags(flags), vsync(vsync), set_width(width), set_height(height),
+                glsl_version(glsl_version), dark(dark), isDockingEnable(flags & ImGuiConfigFlags_DockingEnable),
+                isViewportEnable(flags & ImGuiConfigFlags_ViewportsEnable), get_width(0), get_height(0), fb_width(0),
                 fb_height(0) {};
         };
         ImguiConfig *currentConfig;
@@ -36,8 +37,18 @@ namespace Backend {
         static void pollEvents();
         void newFrame() const;
         void render() const;
-        void measureWH() { glfwGetWindowSize(window, &currentConfig->ms_width, &currentConfig->ms_height); }
-        void measureFBWH() { glfwGetFramebufferSize(window, &currentConfig->fb_width, &currentConfig->fb_height); }
+        void measureWH() const {
+            currentConfig->last_width  = currentConfig->get_width,
+            currentConfig->last_height = currentConfig->get_height;
+            glfwGetWindowSize(window, &currentConfig->get_width, &currentConfig->get_height);
+            if (currentConfig->last_width == 0 || currentConfig->last_height == 0) {
+                currentConfig->last_width  = currentConfig->get_width,
+                currentConfig->last_height = currentConfig->get_height;
+            }
+        }
+        void measureFBWH() const {
+            glfwGetFramebufferSize(window, &currentConfig->fb_width, &currentConfig->fb_height);
+        }
         [[nodiscard]] bool shouldClose() const;
         GLFWwindow *window;
     };

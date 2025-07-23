@@ -1,10 +1,9 @@
 #include <algorithm>
 #include <cstdio>
-#include "backends/imgui_impl_glfw.h"
-// #include "backends/imgui_impl_opengl3.h"
+#include <vector>
 #include "imgui.h"
+#include "imnodes.h"
 #define GL_SILENCE_DEPRECATION
-// #include <GLFW/glfw3.h>
 #include "ImGuiMgr.h"
 int main(int, char **) {
     ImGuiConfigFlags flags = 0;
@@ -18,8 +17,8 @@ int main(int, char **) {
     Backend::ImGuiMgr::ImguiConfig config("ImGui", 1280, 720, flags, 1, "#version 130");
     const Backend::ImGuiMgr imgui(config);
     ImGuiIO &io                     = ImGui::GetIO();
-    const int w                     = config.ms_width;
-    const int h                     = config.ms_height;
+    const int w                     = config.get_width;
+    const int h                     = config.get_height;
     const int fb_w                  = config.fb_width;
     const int fb_h                  = config.fb_height;
     const float font_scaling_factor = std::max(static_cast<float>(fb_w) / static_cast<float>(w),
@@ -32,6 +31,10 @@ int main(int, char **) {
                                                        io.Fonts->GetGlyphRangesChineseFull());
     io.FontGlobalScale /= (font_scaling_factor);
     IM_ASSERT(font1 || font2 != nullptr);
+    io.ConfigDockingWithShift                         = false;
+    ImGui::GetStyle().AntiAliasedLines                = true;
+    ImGui::GetStyle().AntiAliasedFill                 = true;
+    ImGui::GetStyle().Colors[ImGuiCol_DockingEmptyBg] = ImVec4(1.0f, 1.0f, 0.6f, 0.0f);
     // 主循环
     while (!imgui.shouldClose()) {
         Backend::ImGuiMgr::pollEvents();
@@ -57,6 +60,14 @@ int main(int, char **) {
             ImGui::Separator();
             ImGui::TextColored(ImVec4(1, 1, 0, 1), "Important Message");
             ImGui::Text("This is a log message.");
+            {
+                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1, 0.1, 0.1, 1));
+                ImGui::BeginChild("Log Window", ImVec2(0, 0), true, ImGuiWindowFlags_AlwaysVerticalScrollbar);
+                ImGui::Text("Fuck World");
+                ImGui::Separator();
+                ImGui::EndChild();
+                ImGui::PopStyleColor();
+            }
             ImGui::End();
         }
         {
@@ -71,8 +82,29 @@ int main(int, char **) {
             }
             ImGui::End();
         }
-        ImGui::GetStyle().AntiAliasedLines = true;
-        ImGui::GetStyle().AntiAliasedFill  = true;
+        int start_attr, end_attr;
+        bool have = false;
+        {
+            ImGui::Begin("Graph Demo");
+            ImNodes::BeginNodeEditor();
+            ImNodes::BeginNode(1);
+            ImNodes::BeginOutputAttribute(1);
+            ImGui::Text("output pin");
+            ImNodes::EndOutputAttribute();
+            ImNodes::EndNode();
+            ImNodes::BeginNode(2);
+            ImNodes::BeginInputAttribute(2);
+            ImGui::Text("input pin");
+            ImNodes::EndInputAttribute();
+            ImNodes::EndNode();
+            ImNodes::Link(1, 1, 2);
+            ImNodes::MiniMap();
+            ImNodes::EndNodeEditor();
+            if (ImNodes::IsLinkCreated(&start_attr, &end_attr)) {
+                have = true;
+            }
+            ImGui::End();
+        }
         imgui.render();
     }
     return 0;
