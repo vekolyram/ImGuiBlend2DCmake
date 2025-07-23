@@ -11,16 +11,35 @@ namespace Backend {
     static void glfw_error_callback(int error, const char *description);
     class ImGuiMgr {
     public:
-        ImGuiMgr(const char *title, int width, int height, int vsync, ImGuiConfigFlags config, const char *glsl_version,
-                 bool dark = true);
+        struct ImguiConfig {
+        public:
+            const char *title;
+            const ImGuiConfigFlags flags;
+            const int vsync;
+            const int width, height;
+            int ms_width, ms_height, fb_width, fb_height;
+            const char *glsl_version;
+            bool dark;
+            bool isDockingEnable;
+            bool isViewportEnable;
+            explicit ImguiConfig(const char *title = "DefaultTitle", const int width = 1280, const int height = 720,
+                                 const ImGuiConfigFlags flags = 0, const int vsync = 1,
+                                 const char *glsl_version = "#version 130", const bool dark = true) :
+                title(title), flags(flags), vsync(vsync), width(width), height(height), glsl_version(glsl_version),
+                dark(dark), isDockingEnable(flags & ImGuiConfigFlags_DockingEnable),
+                isViewportEnable(flags & ImGuiConfigFlags_ViewportsEnable), ms_width(0), ms_height(0), fb_width(0),
+                fb_height(0) {};
+        };
+        ImguiConfig *currentConfig;
+        ImGuiMgr(ImguiConfig &config);
         ~ImGuiMgr();
         static void pollEvents();
         void newFrame() const;
         void render() const;
+        void measureWH() { glfwGetWindowSize(window, &currentConfig->ms_width, &currentConfig->ms_height); }
+        void measureFBWH() { glfwGetFramebufferSize(window, &currentConfig->fb_width, &currentConfig->fb_height); }
         [[nodiscard]] bool shouldClose() const;
         GLFWwindow *window;
-        int w = 0, h = 0, fb_w = 0, fb_h = 0;
-        const bool isDockingEnable, isViewportEnable;
     };
 } // namespace Backend
 #endif // IMGUIMGR_H

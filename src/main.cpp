@@ -1,33 +1,34 @@
 #include <algorithm>
 #include <cstdio>
 #include "backends/imgui_impl_glfw.h"
-#include "backends/imgui_impl_opengl3.h"
+// #include "backends/imgui_impl_opengl3.h"
 #include "imgui.h"
 #define GL_SILENCE_DEPRECATION
-#include <GLFW/glfw3.h>
+// #include <GLFW/glfw3.h>
 #include "ImGuiMgr.h"
 int main(int, char **) {
-    ImGuiConfigFlags config = 0;
+    ImGuiConfigFlags flags = 0;
     {
-        config |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-        config |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls`
-        config |= ImGuiConfigFlags_DockingEnable;
-        config |= ImGuiConfigFlags_DpiEnableScaleFonts;
-        config |= ImGuiConfigFlags_ViewportsEnable; // 启用多视口
+        flags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+        flags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls`
+        flags |= ImGuiConfigFlags_DockingEnable;
+        flags |= ImGuiConfigFlags_DpiEnableScaleFonts;
+        flags |= ImGuiConfigFlags_ViewportsEnable; // 启用多视口
     }
-    const Backend::ImGuiMgr imgui("ImGui", 1280, 720, 1, config, "#version 130");
+    Backend::ImGuiMgr::ImguiConfig config("ImGui", 1280, 720, flags, 1, "#version 130");
+    const Backend::ImGuiMgr imgui(config);
     ImGuiIO &io                     = ImGui::GetIO();
-    const int w                     = imgui.w;
-    const int h                     = imgui.h;
-    const int fb_w                  = imgui.fb_w;
-    const int fb_h                  = imgui.fb_h;
+    const int w                     = config.ms_width;
+    const int h                     = config.ms_height;
+    const int fb_w                  = config.fb_width;
+    const int fb_h                  = config.fb_height;
     const float font_scaling_factor = std::max(static_cast<float>(fb_w) / static_cast<float>(w),
                                                static_cast<float>(fb_h) / static_cast<float>(h));
-    ImFontConfig cnConfig;
-    cnConfig.MergeMode = true;
+    auto *cnConfig                  = IM_NEW(ImFontConfig)();
+    cnConfig->MergeMode             = true;
     const ImFont *font1 =
             io.Fonts->AddFontFromFileTTF("C:/Users/ASUS/Desktop/JetBrainsMono.ttf", 16 * font_scaling_factor);
-    const ImFont *font2 = io.Fonts->AddFontFromFileTTF("C:/Windows/Fonts/msyh.ttc", 16 * font_scaling_factor, &cnConfig,
+    const ImFont *font2 = io.Fonts->AddFontFromFileTTF("C:/Windows/Fonts/msyh.ttc", 16 * font_scaling_factor, cnConfig,
                                                        io.Fonts->GetGlyphRangesChineseFull());
     io.FontGlobalScale /= (font_scaling_factor);
     IM_ASSERT(font1 || font2 != nullptr);

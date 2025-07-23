@@ -14,24 +14,26 @@ include_directories(
         libs/blend2d/include
         libs/glfw/include
         libs/imgui/include/imgui
+        libs/imgui/include/imgui/backends
 )
 # 收集应用程序源文件
 file(GLOB APP_SOURCES
         "src/*.cpp"
         "src/*.cxx"
+        "libs/imgui/src/imgui/*.cpp"
+        "libs/imgui/src/imgui/backends/*.cpp"
 )
 # 添加应用程序可执行文件
 add_executable(${PROJECT_NAME}
         ${APP_SOURCES}
         src/ImGuiMgr.cpp
-        include/ImGuiMgr.h
 )
 
 # 链接ImGui库到应用程序
 set(GLFW_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/libs/glfw/lib-mingw-w64/libglfw3.a)
 target_link_libraries(${PROJECT_NAME} ${GLFW_LIBRARY})
 set(IMGUI_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/libs/imgui/lib-mingw-w64/libimgui.a)
-target_link_libraries(${PROJECT_NAME} ${IMGUI_LIBRARY})
+#target_link_libraries(${PROJECT_NAME} ${IMGUI_LIBRARY})
 set(BLEND2D_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/libs/blend2d/lib-mingw-w64/libblend2d.a)
 target_link_libraries(${PROJECT_NAME} ${BLEND2D_LIBRARY})
 # Windows系统库
